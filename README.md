@@ -1,5 +1,6 @@
 # Stock-AI-Predictor
 Idk bruh i made sum
+//////////////////////
 This project is a web-based application for predicting next-day stock prices using an LSTM (Long Short-Term Memory) neural network. Built with Streamlit, it allows users to upload a CSV file containing historical stock data and generates a prediction for the next closing price based on the most recent 60 days of data.
 
 The application handles data preprocessing, including normalization using MinMaxScaler, reshaping the data to fit the LSTM input requirements, and feeding it into a pre-trained model. The result is displayed alongside a chart that visualizes recent price trends and the predicted value.
