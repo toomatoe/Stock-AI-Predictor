@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np 
-import matplotlib.pyplot as plt
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 
@@ -71,13 +70,16 @@ if uploaded_file and model is not None:
         st.success(f"Predicted Next Close Price: ${predicted_price:.2f}")
         st.info(f"Predicted Price Change: {predicted_change:.4f} ({predicted_change*100:.2f}%)")
 
-        # Show last 60 + predicted point
-        extended = np.append(last_60, predicted_price)
-        plt.figure(figsize=(10, 4))
-        plt.plot(range(60), last_60, label="Last 60 Days")
-        plt.plot(60, predicted_price, 'ro', label="Predicted")
-        plt.legend()
-        plt.title("Price Prediction")
-        st.pyplot(plt)
+        # Show last 60 + predicted point using Streamlit's native chart
+        chart_data = pd.DataFrame({
+            'Day': list(range(61)),
+            'Historical Prices': list(last_60) + [None],
+            'Predicted Price': [None] * 60 + [predicted_price]
+        })
+        chart_data = chart_data.set_index('Day')
+        st.line_chart(chart_data)
+        
+        # Show prediction details
+        st.info(f"📈 Last Price: ${last_60[-1]:.2f} → Predicted: ${predicted_price:.2f}")
 elif uploaded_file and model is None:
     st.error("Please train a model first! Run 'python lstm_price_change.py' to train the model.")
