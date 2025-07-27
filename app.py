@@ -1,24 +1,39 @@
 import streamlit as st
 import pandas as pd
 import numpy as np 
-from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
+
+# Try to import TensorFlow with error handling
+try:
+    from tensorflow.keras.models import load_model
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    st.error("TensorFlow is not available. Please check the requirements.txt file.")
+    TENSORFLOW_AVAILABLE = False
 
 # Load the price change model 
 
 def load_price_change_model():
+    if not TENSORFLOW_AVAILABLE:
+        st.error("TensorFlow is not available. Cannot load the model.")
+        return None, None, None
+        
     try:
         model = load_model('lstm_price_change_model.h5')
         model_type = 'price_change'
-        st.success("✅ Using LSTM Price Change Model")
-    except:
-        st.error("❌ No trained model found! Please train the model first.")
+        st.success("Using LSTM Price Change Model")
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
         return None, None, None
     
     # Load training data to recreate scaler
-    data = pd.read_csv("aapl.csv")
-    scaler = MinMaxScaler()
-    scaler.fit(data[["Close"]])
+    try:
+        data = pd.read_csv("aapl.csv")
+        scaler = MinMaxScaler()
+        scaler.fit(data[["Close"]])
+    except Exception as e:
+        st.error(f"Error loading training data: {str(e)}")
+        return None, None, None
     
     return model, scaler, model_type
 
@@ -80,6 +95,6 @@ if uploaded_file and model is not None:
         st.line_chart(chart_data)
         
         # Show prediction details
-        st.info(f"📈 Last Price: ${last_60[-1]:.2f} → Predicted: ${predicted_price:.2f}")
+        st.info(f"Last Price: ${last_60[-1]:.2f} → Predicted: ${predicted_price:.2f}")
 elif uploaded_file and model is None:
     st.error("Please train a model first! Run 'python lstm_price_change.py' to train the model.")
